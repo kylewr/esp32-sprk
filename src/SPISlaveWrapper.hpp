@@ -8,16 +8,25 @@
 class SPISlaveWrapper {
     public:
         SPISlaveWrapper();
-        virtual ~SPISlaveWrapper() = default;
+        ~SPISlaveWrapper() = default;
 
-        virtual bool begin() final;
+        bool begin();
 
-        virtual bool hasNewCommand();
+        void listen();
+        void listenAsync();
 
-        virtual void queueSend(uint8_t* data);
+        bool hasNewCommand();
 
-        virtual ESP32SPISlave& getSPI() final {
+        uint8_t parseCommand();
+
+        void queueSend(uint8_t* data);
+
+        ESP32SPISlave& getSPI() {
             return spi;
+        }
+
+        uint8_t* getLatestCommand() {
+            return latestCommand;
         }
 
     protected:
@@ -25,4 +34,6 @@ class SPISlaveWrapper {
 
         uint8_t tx_buf[SPIMappings::BUFFER_SIZE];
         uint8_t rx_buf[SPIMappings::BUFFER_SIZE];
+
+        uint8_t latestCommand[SPIMappings::BUFFER_SIZE];
 };
