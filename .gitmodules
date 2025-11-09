@@ -1,0 +1,3 @@
+[submodule "ESP32SPISlave"]
+	path = lib/ESP32SPISlave
+	url = git@github.com:kylewr/ESP32SPISlave.git
