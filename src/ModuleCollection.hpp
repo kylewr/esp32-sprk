@@ -1,0 +1,61 @@
+#pragma once
+
+#ifndef MODULECOLLECTION_HPP
+#define MODULECOLLECTION_HPP
+
+#include "modules/Module.hpp"
+#include <string>
+#include <unordered_map>
+
+class ModuleCollection {
+    public:
+        ModuleCollection() = default;
+        ~ModuleCollection() {
+            for (auto& [name, module] : modules) {
+                delete module;
+            }
+        };
+
+        void addModule(Module* module) {
+            for (auto& [name, mod] : modules) {
+                if (mod == module) {
+                    return; // Module already exists
+                }
+            }
+
+            modules[module->getName()] = module;
+        }
+
+        void initAll() {
+            for (auto& [name, module] : modules) {
+                module->init();
+            }
+        }
+
+        void updateAll() {
+            for (auto& [name, module] : modules) {
+                module->update();
+            }
+        }
+
+        Module* getModule(const std::string& name) {
+            auto it = modules.find(name);
+            if (it != modules.end()) {
+                return it->second;
+            }
+            return nullptr;
+        }
+
+        template <typename T> T* getModule(const std::string& name) {
+            auto it = modules.find(name);
+            if (it != modules.end()) {
+                return dynamic_cast<T*>(it->second);
+            }
+            return nullptr;
+        }
+
+    private:
+        std::unordered_map<std::string, Module*> modules;
+};
+
+#endif

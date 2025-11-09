@@ -15,9 +15,9 @@ class SPISlaveWrapper {
         void listen();
         void listenAsync();
 
-        bool hasNewCommand();
+        bool checkAndClearBuffers();
 
-        uint8_t parseCommand();
+        void parseCommand(std::function<void(byte*)> customHandler);
 
         void queueSend(uint8_t* data);
 
@@ -29,11 +29,11 @@ class SPISlaveWrapper {
             return latestCommand;
         }
 
-    protected:
+    private:
         ESP32SPISlave spi;
 
         uint8_t tx_buf[SPIMappings::BUFFER_SIZE];
         uint8_t rx_buf[SPIMappings::BUFFER_SIZE];
 
-        uint8_t latestCommand[SPIMappings::BUFFER_SIZE];
+        byte latestCommand[SPIMappings::BUFFER_SIZE];
 };
