@@ -66,7 +66,7 @@ class RSL : public Module {
 
     private:
         RSLState state = RSLState::OFF;
-        uint32_t hz = 5; // default 5 Hz
+        uint32_t hz = 5;
 
         uint32_t lastBlinkTime = 0;
         bool blinkingIsOn = false;

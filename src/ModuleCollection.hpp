@@ -47,9 +47,9 @@ class ModuleCollection {
         }
 
         template <typename T> T* getModule(const std::string& name) {
-            auto it = modules.find(name);
-            if (it != modules.end()) {
-                return dynamic_cast<T*>(it->second);
+            auto mod = getModule(name);
+            if (mod) {
+                return static_cast<T*>(mod);
             }
             return nullptr;
         }

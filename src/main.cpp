@@ -21,6 +21,8 @@ void setup() {
 
     mc.initAll();
     sprkSPI.begin();
+
+    Serial.println("Setup complete");
 }
 
 void loop() {
@@ -40,17 +42,19 @@ void loop() {
 
         COMMAND_IDENT ident = identFromByte(command[0]);
         switch (ident) {
-            case COMMAND_IDENT::NOP:
+            case COMMAND_IDENT::NOP: {
                 // Do nothing
                 break;
-            case COMMAND_IDENT::LED_CTRL:
+            }
+            case COMMAND_IDENT::LED_CTRL: {
                 if (command[1] != 0x00) {
                     digitalWrite(LED, HIGH);
                 } else {
                     digitalWrite(LED, LOW);
                 }
                 break;
-            case COMMAND_IDENT::RSL_STATE:
+            }
+            case COMMAND_IDENT::RSL_STATE: {
                 // Use the second byte to determine the rsl blink state
                 mc.getModule<RSL>(RSL::MODULE_NAME)->setState(command[1]);
                 // use the next 3 bytes to form an integer blink rate in Hz
@@ -59,6 +63,15 @@ void loop() {
                     mc.getModule<RSL>(RSL::MODULE_NAME)->setBlink(blinkRateHz);
                 }
                 break;
+            }
+            case COMMAND_IDENT::ROBOT_DISABLE: {
+                mc.getModule<RSL>(RSL::MODULE_NAME)->setState(RSLState::ON);
+                break;
+            }
+            case COMMAND_IDENT::ROBOT_ENABLE: {
+                mc.getModule<RSL>(RSL::MODULE_NAME)->setState(RSLState::BLINKING);
+                break;
+            }
         }
     });
 }

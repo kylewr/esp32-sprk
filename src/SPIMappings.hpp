@@ -24,6 +24,10 @@ namespace SPIMappings {
         // reserve 0x30-0x3F for robot states
         ROBOT_DISABLE = 0x30,
         ROBOT_ENABLE = 0x31,
+
+        // reserve 0x40 - 0xBF for user-defined commands
+        CONTROL_PINCHERS = 0x48,
+
     };
 
     static const std::unordered_map<uint8_t, COMMAND_IDENT> byteToIdent {
@@ -32,6 +36,7 @@ namespace SPIMappings {
         {0x21, COMMAND_IDENT::RSL_STATE},
         {0x30, COMMAND_IDENT::ROBOT_DISABLE},
         {0x31, COMMAND_IDENT::ROBOT_ENABLE},
+        {0x48, COMMAND_IDENT::CONTROL_PINCHERS},
     };
 
     inline COMMAND_IDENT identFromByte(uint8_t byte) {
