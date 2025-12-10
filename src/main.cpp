@@ -5,6 +5,9 @@
 #include "SPISlaveWrapper.hpp"
 
 #include "modules/RSL.hpp"
+#include "modules/Pinchers.hpp"
+
+#include <ESP32Servo.h>
 
 #define LED 2
 
@@ -18,6 +21,7 @@ void setup() {
     digitalWrite(LED, LOW);
 
     mc.addModule(new RSL());
+    mc.addModule(new Pinchers());
 
     mc.initAll();
     sprkSPI.begin();
@@ -46,6 +50,10 @@ void loop() {
                 // Do nothing
                 break;
             }
+            case COMMAND_IDENT::RESET: {
+                ESP.restart();
+                break;
+            }
             case COMMAND_IDENT::LED_CTRL: {
                 if (command[1] != 0x00) {
                     digitalWrite(LED, HIGH);
@@ -70,6 +78,14 @@ void loop() {
             }
             case COMMAND_IDENT::ROBOT_ENABLE: {
                 mc.getModule<RSL>(RSL::MODULE_NAME)->setState(RSLState::BLINKING);
+                break;
+            }
+            case COMMAND_IDENT::CONTROL_PINCHERS: {
+                int position = command[1]; // Expecting position in degrees (0-180)
+                Serial.print("Setting Pinchers to position: ");
+                Serial.println(position);
+
+                mc.getModule<Pinchers>(Pinchers::MODULE_NAME)->write(position);
                 break;
             }
         }

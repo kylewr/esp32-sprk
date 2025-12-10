@@ -16,6 +16,7 @@ namespace SPIMappings {
         NOP = 0x00,
 
         // reserve 0x01 - 0x1F for system commands
+        RESET = 0x10,
 
         // reserve 0x20 - 0x2F for LED statuses
         LED_CTRL = 0x20,
@@ -32,6 +33,7 @@ namespace SPIMappings {
 
     static const std::unordered_map<uint8_t, COMMAND_IDENT> byteToIdent {
         {0x00, COMMAND_IDENT::NOP},
+        {0x10, COMMAND_IDENT::RESET},
         {0x20, COMMAND_IDENT::LED_CTRL},
         {0x21, COMMAND_IDENT::RSL_STATE},
         {0x30, COMMAND_IDENT::ROBOT_DISABLE},

@@ -54,6 +54,16 @@ class ModuleCollection {
             return nullptr;
         }
 
+        template <typename T> T* getModule() {
+            for (auto& [name, module] : modules) {
+                T* casted = static_cast<T*>(module);
+                if (casted) {
+                    return casted;
+                }
+            }
+            return nullptr;
+        }
+
     private:
         std::unordered_map<std::string, Module*> modules;
 };

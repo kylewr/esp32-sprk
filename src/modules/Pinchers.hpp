@@ -6,7 +6,7 @@
 
 #include <ESP32Servo.h>
 
-#define PINCHERS_PIN 22
+#define PINCHERS_PIN 4
 
 class Pinchers : public Module {
     public:
@@ -15,24 +15,36 @@ class Pinchers : public Module {
         Pinchers() : Module(MODULE_NAME) {}
 
         void init() override {
-            ESP32PWM::allocateTimer(0);
+            // pinMode(PINCHERS_PIN, OUTPUT);
 
-            servo.attach(PINCHERS_PIN);
+            ESP32PWM::allocateTimer(1);
 
+            servo.setPeriodHertz(50);
+
+            servo.attach(PINCHERS_PIN, 0, 270); // Explicitly set min/max pulse widths
         }
 
         void update() override {
-            for (int i = 0; i <= 180; i++) {
-                servo.write(i);
-                delay(5);
-            }
+            // for (int i = 0; i <= 180; i++) {
+            //     servo.write(i);
+            //     delay(5);
+            // }
 
-            for (int i = 180; i >= 0; i--) {
-                servo.write(i);
-                delay(5);
-            }
+            // for (int i = 180; i >= 0; i--) {
+            //     servo.write(i);
+            //     delay(5);
+            // }
         }
-    
+
+        void write(int position) {
+            if (position < 0)
+                position = 0;
+            if (position > 180)
+                position = 180;
+            servo.write(position);
+            pos = position;
+        }
+
     private:
         Servo servo;
 
