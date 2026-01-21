@@ -15,13 +15,11 @@ class Pinchers : public Module {
         Pinchers() : Module(MODULE_NAME) {}
 
         void init() override {
-            // pinMode(PINCHERS_PIN, OUTPUT);
-
             ESP32PWM::allocateTimer(1);
 
-            servo.setPeriodHertz(50);
+            servo.setPeriodHertz(100);
 
-            servo.attach(PINCHERS_PIN, 0, 270); // Explicitly set min/max pulse widths
+            servo.attach(PINCHERS_PIN, 500, 2500); // microseconds
         }
 
         void update() override {
@@ -39,10 +37,21 @@ class Pinchers : public Module {
         void write(int position) {
             if (position < 0)
                 position = 0;
-            if (position > 180)
-                position = 180;
+            if (position > 270)
+                position = 270;
+            
+            position = map(position, 0, 270, 0, 180); // map to servo range
             servo.write(position);
             pos = position;
+        }
+
+        void writeMicroseconds(int pulse_us) {
+            // Direct pulse width control (500-2500 μs)
+            if (pulse_us < 500)
+                pulse_us = 500;
+            if (pulse_us > 2500)
+                pulse_us = 2500;
+            servo.writeMicroseconds(pulse_us);
         }
 
     private:
