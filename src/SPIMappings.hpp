@@ -27,6 +27,7 @@ namespace SPIMappings {
         ROBOT_ENABLE = 0x31,
 
         // reserve 0x40-0xBF for user-defined commands
+        CONTROL_DT = 0x40,
         CONTROL_PINCHERS = 0x51,
         
         // reserve 0xC0-CF for test commands
@@ -42,6 +43,7 @@ namespace SPIMappings {
         {0x21, COMMAND_IDENT::RSL_STATE},
         {0x30, COMMAND_IDENT::ROBOT_DISABLE},
         {0x31, COMMAND_IDENT::ROBOT_ENABLE},
+        {0x40, COMMAND_IDENT::CONTROL_DT},
         {0x51, COMMAND_IDENT::CONTROL_PINCHERS},
         {0xC0, COMMAND_IDENT::TEST_ZERO},
         {0xC1, COMMAND_IDENT::TEST_ONE},

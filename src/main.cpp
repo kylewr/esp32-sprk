@@ -4,6 +4,7 @@
 #include "ModuleCollection.hpp"
 #include "SPISlaveWrapper.hpp"
 
+#include "modules/Drivetrain.hpp"
 #include "modules/LEDStatuses.hpp"
 #include "modules/Pinchers.hpp"
 
@@ -22,6 +23,7 @@ void setup() {
 
     mc.addModule(new LEDStatuses());
     mc.addModule(new Pinchers());
+    mc.addModule(new Drivetrain());
 
     mc.initAll();
     sprkSPI.begin();
@@ -80,6 +82,9 @@ void loop() {
                 mc.getModule<LEDStatuses>(LEDStatuses::MODULE_NAME)->setRSL(LEDState::BLINKING);
                 break;
             }
+            case COMMAND_IDENT::CONTROL_DT: {
+                break;
+            }
             case COMMAND_IDENT::CONTROL_PINCHERS: {
                 int position = (command[1] << 8) | command[2]; // the biggest byte should be zero
                 Serial.print("Setting Pinchers to position: ");
@@ -90,12 +95,12 @@ void loop() {
             }
             case COMMAND_IDENT::TEST_ZERO: {
                 digitalWrite(LED, LOW);
-                mc.getModule<Pinchers>(Pinchers::MODULE_NAME)->write(0);
+                mc.getModule<Drivetrain>(Drivetrain::MODULE_NAME)->setDTState(false, false);
                 break;
             }
             case COMMAND_IDENT::TEST_ONE: {
                 digitalWrite(LED, HIGH);
-                mc.getModule<Pinchers>(Pinchers::MODULE_NAME)->write(270);
+                mc.getModule<Drivetrain>(Drivetrain::MODULE_NAME)->setDTState(true, false);
                 break;
             }
         }
