@@ -9,7 +9,6 @@
 #define STATUS_PIN 22
 
 enum class LEDState { OFF, ON, BLINKING };
-// enum class StatusDescriptions { NONE, NO_DS };
 
 // inline constexpr uint32_t getStateNumber(LEDState state) {
 //     switch (state) {
@@ -31,9 +30,11 @@ class LEDStatuses : public Module {
 
         void init() override {
             pinMode(RSL_PIN, OUTPUT);
-            digitalWrite(RSL_PIN, HIGH); // RSL on
             pinMode(STATUS_PIN, OUTPUT);
-            digitalWrite(STATUS_PIN, LOW); // status off
+
+            // write all status pins low
+            digitalWrite(RSL_PIN, LOW);
+            digitalWrite(STATUS_PIN, LOW);
         }
 
         void update() override {
@@ -83,20 +84,6 @@ class LEDStatuses : public Module {
             }
         }
 
-        void setStatus(uint8_t state) {
-            switch (state) {
-                case 0x01:
-                    setStatus(LEDState::ON);
-                    break;
-                case 0x02:
-                    setStatus(LEDState::BLINKING);
-                    break;
-                default:
-                    setStatus(LEDState::OFF);
-                    break;
-            }
-        }
-
         void setStatus(LEDState newState) {
             state_STATUS = newState;
             switch (newState) {
@@ -112,8 +99,12 @@ class LEDStatuses : public Module {
             }
         }
 
-        void setBlink(uint32_t frequencyHz) {
+        void setRSLBlinkHz(uint32_t frequencyHz) {
             hz_RSL = frequencyHz;
+        }
+
+        void setStatusBlinkHz(uint32_t frequencyHz) {
+            hz_STATUS = frequencyHz;
         }
 
     private:

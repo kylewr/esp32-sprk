@@ -21,6 +21,10 @@ class SPISlaveWrapper {
 
         void queueSend(uint8_t* data);
 
+        // Connection status methods
+        bool isMasterConnected();
+        void updateConnectionStatus();
+
         ESP32SPISlave& getSPI() {
             return spi;
         }
@@ -36,4 +40,9 @@ class SPISlaveWrapper {
         uint8_t rx_buf[SPIMappings::BUFFER_SIZE];
 
         byte latestCommand[SPIMappings::BUFFER_SIZE];
+
+        // Connection tracking
+        unsigned long lastActivityTime;
+        bool masterConnected;
+        static constexpr unsigned long CONNECTION_TIMEOUT_MS = 1000; // 1 second
 };

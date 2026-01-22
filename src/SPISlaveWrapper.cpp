@@ -10,6 +10,9 @@ SPISlaveWrapper::SPISlaveWrapper() {
 
     memset(tx_buf, 0, BUFFER_SIZE);
     memset(rx_buf, 0, BUFFER_SIZE);
+
+    lastActivityTime = 0;
+    masterConnected = false;
 }
 
 bool SPISlaveWrapper::begin() {
@@ -37,6 +40,9 @@ void SPISlaveWrapper::listenAsync() {
 
 bool SPISlaveWrapper::checkAndClearBuffers() {
     if (spi.hasTransactionsCompletedAndAllResultsReady(QUEUE_SIZE)) {
+        lastActivityTime = millis(); // Update last activity time
+        masterConnected = true;
+
         memcpy(latestCommand, rx_buf, BUFFER_SIZE);
         memset(rx_buf, 0, BUFFER_SIZE);
         memset(tx_buf, 0, BUFFER_SIZE);
@@ -65,4 +71,14 @@ void SPISlaveWrapper::queueSend(uint8_t* data) {
     }
 
     // spi.queue(data, NULL, Constants::BUFFER_SIZE);
+}
+
+void SPISlaveWrapper::updateConnectionStatus() {
+    if (millis() - lastActivityTime > CONNECTION_TIMEOUT_MS) {
+        masterConnected = false;
+    }
+}
+
+bool SPISlaveWrapper::isMasterConnected() {
+    return masterConnected;
 }
