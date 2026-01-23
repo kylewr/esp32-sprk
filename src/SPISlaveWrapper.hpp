@@ -20,6 +20,7 @@ class SPISlaveWrapper {
         void parseCommand(std::function<void(byte*)> customHandler);
 
         void queueSend(uint8_t* data);
+        void queueSend(const uint8_t* data);
 
         // Connection status methods
         bool isMasterConnected();

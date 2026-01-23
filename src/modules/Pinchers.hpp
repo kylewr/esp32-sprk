@@ -23,15 +23,32 @@ class Pinchers : public Module {
         }
 
         void update() override {
-            // for (int i = 0; i <= 180; i++) {
-            //     servo.write(i);
-            //     delay(5);
+            // if (disable) {
+            //     servo.detach();
+            // } else {
+            //     if (!servo.attached()) {
+            //         servo.attach(PINCHERS_PIN, 500, 2500);
+            //         servo.write(pos); // restore last position
+            //     }
             // }
+        }
 
-            // for (int i = 180; i >= 0; i--) {
-            //     servo.write(i);
-            //     delay(5);
-            // }
+        void disableBehavior() override {
+            disable = true;
+        }
+
+        void enableBehavior() override {
+            disable = false;
+        }
+
+        void accept(COMMAND_IDENT ident, byte* data) override {
+            switch (ident) {
+                case COMMAND_IDENT::CONTROL_PINCHERS: {
+                    int position = (data[1] << 8) | data[2];
+                    write(position);
+                    break;
+                }
+            }
         }
 
         void write(int position) {
@@ -39,9 +56,11 @@ class Pinchers : public Module {
                 position = 0;
             if (position > 270)
                 position = 270;
-            
+
             position = map(position, 0, 270, 0, 180); // map to servo range
-            servo.write(position);
+            if (!disable) {
+                servo.write(position);
+            }
             pos = position;
         }
 
@@ -55,6 +74,8 @@ class Pinchers : public Module {
         }
 
     private:
+        bool disable = true;
+
         Servo servo;
 
         int pos {0};

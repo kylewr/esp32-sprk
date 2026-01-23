@@ -35,7 +35,7 @@ void setup() {
 
     mc.initAll();
 
-    statusHandler = new StatusHandler(&mc);
+    statusHandler = new StatusHandler(&mc, &sprkSPI);
 
     sprkSPI.begin();
 
@@ -62,7 +62,7 @@ void loop() {
         Serial.println("");
 #endif
 
-        COMMAND_IDENT ident = identFromByte(command[0]);
+        COMMAND_IDENT ident = getCommandFromByte(command[0]);
         switch (ident) {
             case COMMAND_IDENT::NO_OP: {
                 // Do nothing
@@ -109,6 +109,7 @@ void loop() {
             }
             case COMMAND_IDENT::ROBOT_DISABLE: {
                 statusHandler->disable();
+                mc.getModule<Drivetrain>(Drivetrain::MODULE_NAME)->setAllModules(false, false);
                 break;
             }
             case COMMAND_IDENT::ROBOT_ENABLE: {
@@ -116,24 +117,26 @@ void loop() {
                 break;
             }
             case COMMAND_IDENT::CONTROL_DRIVETRAIN: {
+                if (statusHandler->isEnabled()) {
+                    mc.getModule<Drivetrain>(Drivetrain::MODULE_NAME)->accept(ident, command);   
+                }
                 break;
             }
             case COMMAND_IDENT::CONTROL_PINCHERS: {
-                int position = (command[1] << 8) | command[2]; // the biggest byte should be zero
-                Serial.print("Setting Pinchers to position: ");
-                Serial.println(position);
-
-                mc.getModule<Pinchers>(Pinchers::MODULE_NAME)->write(position);
+                if (statusHandler->isEnabled()) {
+                    mc.getModule<Pinchers>(Pinchers::MODULE_NAME)->accept(ident, command);
+                }
                 break;
             }
             case COMMAND_IDENT::TEST_ZERO: {
                 digitalWrite(LED, LOW);
-                mc.getModule<Drivetrain>(Drivetrain::MODULE_NAME)->setDTState(false, false);
+                statusHandler->invokeUnrecoverableError();
+                // mc.getModule<Drivetrain>(Drivetrain::MODULE_NAME)->setAllModules(false, false);
                 break;
             }
             case COMMAND_IDENT::TEST_ONE: {
                 digitalWrite(LED, HIGH);
-                mc.getModule<Drivetrain>(Drivetrain::MODULE_NAME)->setDTState(true, false);
+                // mc.getModule<Drivetrain>(Drivetrain::MODULE_NAME)->setAllModules(true, false);
                 break;
             }
         }

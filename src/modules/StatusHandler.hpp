@@ -1,7 +1,7 @@
 #pragma once
 
-#include "SPIMappings.hpp"
 #include "ModuleCollection.hpp"
+#include "SPIMappings.hpp"
 #include "modules/LEDStatuses.hpp"
 
 using namespace SPIMappings;
@@ -12,8 +12,19 @@ class StatusHandler {
     public:
         static constexpr const bool ALLOW_SPI_LED_CONTROL = false;
 
-        StatusHandler(ModuleCollection* moduleCollection) : mc(moduleCollection) {
-            if (mc == nullptr) {
+        StatusHandler(ModuleCollection* moduleCollection, SPISlaveWrapper* spiWrapper)
+            : mc(moduleCollection), sprkSPI(spiWrapper) {
+            /*
+            The point of getting the ledstatuses and storing the pointer here
+            is to avoid having to look it up from the MC every time.
+
+            The LED statuses should be the source of truth for status indication.
+
+            Unfortunately, we also need the SPISlave wrapper because on enable/disable
+            we need to send ACKs back to the master.
+            */
+
+            if (mc == nullptr || sprkSPI == nullptr) {
                 ledStatuses = nullptr;
                 currentStatus = StatusDescriptions::UNRECOVERABLE_ERROR;
                 return;
@@ -28,12 +39,13 @@ class StatusHandler {
             }
         }
 
-        bool isEnabled() const {
+        inline bool isEnabled() const {
             return _isEnabled;
         }
 
         bool canEnable() const {
-            return ledStatuses != nullptr && currentStatus != StatusDescriptions::UNRECOVERABLE_ERROR;
+            return ledStatuses != nullptr &&
+                   currentStatus != StatusDescriptions::UNRECOVERABLE_ERROR;
         }
 
         bool enable() {
@@ -44,14 +56,27 @@ class StatusHandler {
             }
 
             ledStatuses->setRSL(LEDState::BLINKING);
+            mc->enableAll();
 
             _isEnabled = true;
-            return status;
+
+            // send an ack
+            static const uint8_t ackEnable[SPIMappings::BUFFER_SIZE] = {
+                static_cast<uint8_t>(RESPONSE_IDENT::ACK_ROBOT_ENABLE)};
+            sprkSPI->queueSend(ackEnable);
+
+            return true;
         }
 
         void disable() {
             _isEnabled = false;
             ledStatuses->setRSL(LEDState::ON);
+            mc->disableAll();
+
+            // send an ack
+            static const uint8_t ackDisable[SPIMappings::BUFFER_SIZE] = {
+                static_cast<uint8_t>(RESPONSE_IDENT::ACK_ROBOT_DISABLE)};
+            sprkSPI->queueSend(ackDisable);
         }
 
         void setStatus(StatusDescriptions newStatus) {
@@ -86,6 +111,16 @@ class StatusHandler {
         }
 
         void updateMasterConnectionStatus(bool hasMaster) {
+            // // if we have the master connection but incorrect heartbeat, fix the state
+            // if (hasMaster && isEnabled() && heartbeatType ==
+            // COMMAND_IDENT::MASTER_HEARTBEAT_DISABLE) {
+            //     disable();
+            // } else if (hasMaster && !isEnabled() && heartbeatType ==
+            // COMMAND_IDENT::MASTER_HEARTBEAT_ENABLED) {
+            //     enable();
+            // }
+
+            // recovery checks
             if (hasMaster && !_hadMaster) {
                 // just gained master connection
                 if (!isEnabled() && heartbeatType == COMMAND_IDENT::MASTER_HEARTBEAT_ENABLED) {
@@ -110,8 +145,17 @@ class StatusHandler {
             }
         }
 
+        void invokeUnrecoverableError() {
+            setStatus(StatusDescriptions::UNRECOVERABLE_ERROR);
+        }
+
+        inline bool isInErrorState() const {
+            return currentStatus == StatusDescriptions::UNRECOVERABLE_ERROR;
+        }
+
     private:
         ModuleCollection* mc;
+        SPISlaveWrapper* sprkSPI;
         LEDStatuses* ledStatuses;
 
         StatusDescriptions currentStatus = StatusDescriptions::INIT;

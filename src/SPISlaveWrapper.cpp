@@ -30,9 +30,7 @@ void SPISlaveWrapper::listen() {
 
 void SPISlaveWrapper::listenAsync() {
     if (spi.hasTransactionsCompletedAndAllResultsHandled()) {
-        spi.queue(NULL, rx_buf, BUFFER_SIZE);
-
-        spi.queue(tx_buf, NULL, BUFFER_SIZE);
+        spi.queue(tx_buf, rx_buf, BUFFER_SIZE);  // TX and RX happen simultaneously
 
         spi.trigger();
     }
@@ -66,11 +64,12 @@ void SPISlaveWrapper::parseCommand(std::function<void(byte*)> customHandler) {
 }
 
 void SPISlaveWrapper::queueSend(uint8_t* data) {
-    if (!spi.hasTransactionsCompletedAndAllResultsHandled()) {
-        return;
-    }
+    // Copy response data to tx buffer for next transaction
+    memcpy(tx_buf, data, BUFFER_SIZE);
+}
 
-    // spi.queue(data, NULL, Constants::BUFFER_SIZE);
+void SPISlaveWrapper::queueSend(const uint8_t* data) {
+    memcpy(tx_buf, data, BUFFER_SIZE);
 }
 
 void SPISlaveWrapper::updateConnectionStatus() {

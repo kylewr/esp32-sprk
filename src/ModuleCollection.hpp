@@ -38,6 +38,18 @@ class ModuleCollection {
             }
         }
 
+        void disableAll() {
+            for (auto& [name, module] : modules) {
+                module->disableBehavior();
+            }
+        }
+        
+        void enableAll() {
+            for (auto& [name, module] : modules) {
+                module->enableBehavior();
+            }
+        }
+
         Module* getModule(const std::string& name) {
             auto it = modules.find(name);
             if (it != modules.end()) {

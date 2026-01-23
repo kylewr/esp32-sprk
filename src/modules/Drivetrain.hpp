@@ -38,11 +38,34 @@ class Drivetrain : public Module {
             digitalWrite(BR_LOW, LOW);
         }
 
-        void update() override {
+        void update() override {}
 
+        void disableBehavior() override {
+            setAllModules(false, false);
         }
 
-        void setDTState(bool low, bool high) {
+        void accept(COMMAND_IDENT ident, byte* data) override {
+            switch (ident) {
+                case COMMAND_IDENT::CONTROL_DRIVETRAIN: {
+                    // convert unsigned 8 bit values for each module
+                    int8_t fl = data[1] - 128;
+                    int8_t fr = data[2] - 128;
+                    int8_t bl = data[3] - 128;
+                    int8_t br = data[4] - 128;
+
+                    setModule(0, fl);
+                    setModule(1, fr);
+                    setModule(2, bl);
+                    setModule(3, br);
+                    break;
+                }
+                default: {
+                    break;
+                }
+            }
+        }
+
+        void setAllModules(bool low, bool high) {
             digitalWrite(FL_LOW, low ? HIGH : LOW);
             digitalWrite(FL_HIGH, high ? HIGH : LOW);
             digitalWrite(FR_LOW, low ? HIGH : LOW);
@@ -52,5 +75,19 @@ class Drivetrain : public Module {
             digitalWrite(BR_LOW, low ? HIGH : LOW);
             digitalWrite(BR_HIGH, high ? HIGH : LOW);
         }
-    
+
+        void setModule(uint8_t module, int vel) {
+            if (vel == 0) {
+                digitalWrite(MODULE_PINS[module][0], LOW);
+                digitalWrite(MODULE_PINS[module][1], LOW);
+                return;
+            }
+
+            digitalWrite(MODULE_PINS[module][0], vel < 0 ? HIGH : LOW);
+            digitalWrite(MODULE_PINS[module][1], vel > 0 ? HIGH : LOW);
+        }
+
+    private:
+        static constexpr int MODULE_PINS[4][2] = {
+            {FL_LOW, FL_HIGH}, {FR_LOW, FR_HIGH}, {BL_LOW, BL_HIGH}, {BR_LOW, BR_HIGH}};
 };

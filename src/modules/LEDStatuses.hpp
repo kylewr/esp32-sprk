@@ -55,6 +55,8 @@ class LEDStatuses : public Module {
             }
         }
 
+        void disableBehavior() override {}
+
         void setRSL(uint8_t state) {
             switch (state) {
                 case 0x01:
@@ -108,7 +110,6 @@ class LEDStatuses : public Module {
         }
 
     private:
-
         uint32_t hz_RSL = 5;
         uint32_t hz_STATUS = 2;
 
