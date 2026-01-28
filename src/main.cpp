@@ -3,11 +3,11 @@
 
 #include "ModuleCollection.hpp"
 #include "SPISlaveWrapper.hpp"
+#include "StatusHandler.hpp"
 
 #include "modules/Drivetrain.hpp"
 #include "modules/LEDStatuses.hpp"
 #include "modules/Pinchers.hpp"
-#include "modules/StatusHandler.hpp"
 
 #include <ESP32Servo.h>
 
@@ -16,7 +16,7 @@
 /*
 These flags are the "build flags" that determine certain features of the build.
 */
-#define USE_DEBUG_SERIAL
+// #define USE_DEBUG_SERIAL
 
 ModuleCollection mc;
 SPISlaveWrapper sprkSPI;
@@ -62,6 +62,9 @@ void loop() {
         Serial.println("");
 #endif
 
+        static const uint8_t ack_mcu_estop[SPIMappings::BUFFER_SIZE] = {
+                    static_cast<uint8_t>(RESPONSE_IDENT::ACK_MCU_ESTOP)};
+
         COMMAND_IDENT ident = getCommandFromByte(command[0]);
         switch (ident) {
             case COMMAND_IDENT::NO_OP: {
@@ -69,10 +72,16 @@ void loop() {
                 break;
             }
             case COMMAND_IDENT::MASTER_HEARTBEAT_DISABLE: {
+                if (statusHandler->getStatus() == StatusDescriptions::UNRECOVERABLE_ERROR) {
+                    sprkSPI.queueSend(ack_mcu_estop);
+                }
                 statusHandler->setHeartbeatType(COMMAND_IDENT::MASTER_HEARTBEAT_DISABLE);
                 break;
             }
             case COMMAND_IDENT::MASTER_HEARTBEAT_ENABLED: {
+                if (statusHandler->getStatus() == StatusDescriptions::UNRECOVERABLE_ERROR) {
+                    sprkSPI.queueSend(ack_mcu_estop);
+                }
                 statusHandler->setHeartbeatType(COMMAND_IDENT::MASTER_HEARTBEAT_ENABLED);
                 break;
             }
@@ -131,12 +140,10 @@ void loop() {
             case COMMAND_IDENT::TEST_ZERO: {
                 digitalWrite(LED, LOW);
                 statusHandler->invokeUnrecoverableError();
-                // mc.getModule<Drivetrain>(Drivetrain::MODULE_NAME)->setAllModules(false, false);
                 break;
             }
             case COMMAND_IDENT::TEST_ONE: {
                 digitalWrite(LED, HIGH);
-                // mc.getModule<Drivetrain>(Drivetrain::MODULE_NAME)->setAllModules(true, false);
                 break;
             }
         }

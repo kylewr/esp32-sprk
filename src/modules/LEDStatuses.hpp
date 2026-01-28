@@ -81,7 +81,8 @@ class LEDStatuses : public Module {
                     digitalWrite(RSL_PIN, HIGH);
                     break;
                 case LEDState::BLINKING:
-                    // Implement blinking logic if needed
+                    lastBlinkTime_RSL = 0;
+                    blinkingIsOn_RSL = true;
                     break;
             }
         }
@@ -96,7 +97,8 @@ class LEDStatuses : public Module {
                     digitalWrite(STATUS_PIN, HIGH);
                     break;
                 case LEDState::BLINKING:
-                    // Implement blinking logic if needed
+                    lastBlinkTime_STATUS = 0;
+                    blinkingIsOn_STATUS = true;
                     break;
             }
         }

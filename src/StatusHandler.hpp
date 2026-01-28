@@ -70,7 +70,9 @@ class StatusHandler {
 
         void disable() {
             _isEnabled = false;
-            ledStatuses->setRSL(LEDState::ON);
+            if (currentStatus != StatusDescriptions::UNRECOVERABLE_ERROR) {
+                ledStatuses->setRSL(LEDState::ON);
+            }
             mc->disableAll();
 
             // send an ack
@@ -79,7 +81,15 @@ class StatusHandler {
             sprkSPI->queueSend(ackDisable);
         }
 
+        inline StatusDescriptions getStatus() const {
+            return currentStatus;
+        }
+
         void setStatus(StatusDescriptions newStatus) {
+            if (currentStatus == StatusDescriptions::UNRECOVERABLE_ERROR || newStatus == currentStatus) {
+                return;
+            }
+
             currentStatus = newStatus;
 
             if (ledStatuses == nullptr) {
