@@ -16,12 +16,14 @@
 /*
 These flags are the "build flags" that determine certain features of the build.
 */
-#define USE_DEBUG_SERIAL
+// #define USE_DEBUG_SERIAL
 
 ModuleCollection mc;
 SPISlaveWrapper sprkSPI;
 
 StatusHandler* statusHandler = nullptr;
+
+uint32_t lastStatusUpdateTime = 0;
 
 void setup() {
     Serial.begin(9600);
@@ -50,6 +52,8 @@ void loop() {
 
     statusHandler->updateMasterConnectionStatus(sprkSPI.isMasterConnected());
 
+    // lastStatusUpdateTime++;
+
     sprkSPI.parseCommand([](byte* command) {
         using namespace SPIMappings;
 
@@ -75,6 +79,10 @@ void loop() {
                 if (statusHandler->getStatus() == StatusDescriptions::UNRECOVERABLE_ERROR) {
                     sprkSPI.queueSend(ack_mcu_estop);
                 }
+                if (statusHandler->isEnabled()) {
+                    statusHandler->disable();
+                }
+                // lastStatusUpdateTime = 0;
                 statusHandler->setHeartbeatType(COMMAND_IDENT::MASTER_HEARTBEAT_DISABLE);
                 break;
             }
@@ -82,6 +90,10 @@ void loop() {
                 if (statusHandler->getStatus() == StatusDescriptions::UNRECOVERABLE_ERROR) {
                     sprkSPI.queueSend(ack_mcu_estop);
                 }
+                if (!statusHandler->isEnabled()) {
+                    statusHandler->enable();
+                }
+                // lastStatusUpdateTime = 0;
                 statusHandler->setHeartbeatType(COMMAND_IDENT::MASTER_HEARTBEAT_ENABLED);
                 break;
             }
