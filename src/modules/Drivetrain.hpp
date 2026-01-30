@@ -8,7 +8,7 @@
 #define FR_HIGH 32
 #define FR_LOW 33
 #define BL_HIGH 13
-#define BL_LOW 14
+#define BL_LOW 25 // yes its weird but that way we dont conflict with the esp making the pin hgih at boot
 #define BR_HIGH 16
 #define BR_LOW 17
 
