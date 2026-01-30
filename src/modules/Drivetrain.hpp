@@ -48,10 +48,10 @@ class Drivetrain : public Module {
             switch (ident) {
                 case COMMAND_IDENT::CONTROL_DRIVETRAIN: {
                     // convert unsigned 8 bit values for each module
-                    int8_t fl = data[1] - 128;
-                    int8_t fr = data[2] - 128;
-                    int8_t bl = data[3] - 128;
-                    int8_t br = data[4] - 128;
+                    int8_t fl = data[1] - 127;
+                    int8_t fr = data[2] - 127;
+                    int8_t bl = data[3] - 127;
+                    int8_t br = data[4] - 127;
 
                     setModule(0, fl);
                     setModule(1, fr);

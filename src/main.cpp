@@ -16,7 +16,7 @@
 /*
 These flags are the "build flags" that determine certain features of the build.
 */
-// #define USE_DEBUG_SERIAL
+#define USE_DEBUG_SERIAL
 
 ModuleCollection mc;
 SPISlaveWrapper sprkSPI;
