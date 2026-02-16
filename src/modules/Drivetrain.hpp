@@ -3,14 +3,14 @@
 #include "modules/Module.hpp"
 #include <ESP32PWM.h>
 
-#define FL_HIGH 26
-#define FL_LOW 27
-#define FR_HIGH 32
-#define FR_LOW 33
-#define BL_HIGH 13
-#define BL_LOW 25 // yes its weird but that way we dont conflict with the esp making the pin hgih at boot
-#define BR_HIGH 16
-#define BR_LOW 17
+#define FL_HIGH 4
+#define FL_LOW 5
+#define FR_HIGH 6
+#define FR_LOW 7
+#define BL_HIGH 15
+#define BL_LOW 16
+#define BR_HIGH 17
+#define BR_LOW 18
 
 class Drivetrain : public Module {
     public:

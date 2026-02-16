@@ -11,8 +11,6 @@
 
 #include <ESP32Servo.h>
 
-#define LED 2
-
 /*
 These flags are the "build flags" that determine certain features of the build.
 */
@@ -26,10 +24,11 @@ StatusHandler* statusHandler = nullptr;
 uint32_t lastStatusUpdateTime = 0;
 
 void setup() {
-    Serial.begin(9600);
-
-    pinMode(LED, OUTPUT);
-    digitalWrite(LED, LOW);
+    Serial.begin(115200);
+    unsigned long serialWaitStart = millis();
+    while (!Serial && millis() - serialWaitStart < 3000) {
+        delay(10);
+    }
 
     mc.addModule(new LEDStatuses());
     mc.addModule(new Pinchers());
@@ -107,11 +106,6 @@ void loop() {
                     break;
                 }
 
-                if (command[1] != 0x00) {
-                    digitalWrite(LED, HIGH);
-                } else {
-                    digitalWrite(LED, LOW);
-                }
                 break;
             }
             case COMMAND_IDENT::LEDS_RSL_CTRL: {
@@ -150,12 +144,10 @@ void loop() {
                 break;
             }
             case COMMAND_IDENT::TEST_ZERO: {
-                digitalWrite(LED, LOW);
                 statusHandler->invokeUnrecoverableError();
                 break;
             }
             case COMMAND_IDENT::TEST_ONE: {
-                digitalWrite(LED, HIGH);
                 break;
             }
         }

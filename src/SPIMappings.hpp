@@ -9,7 +9,11 @@
 namespace SPIMappings {
     static constexpr size_t BUFFER_SIZE = 16;
     static constexpr uint8_t QUEUE_SIZE = 1;
-    static constexpr uint8_t SPI_BUS = VSPI;
+    static constexpr uint8_t SPI_BUS = SPI3_HOST;
+    static constexpr int SPI_MOSI_PIN = 35;
+    static constexpr int SPI_MISO_PIN = 37;
+    static constexpr int SPI_SCK_PIN = 36;
+    static constexpr int SPI_SS_PIN = 39;
     static constexpr uint8_t SPI_MODE = SPI_MODE0;
 
     enum class COMMAND_IDENT : uint8_t {

@@ -6,7 +6,7 @@
 
 #include <ESP32Servo.h>
 
-#define PINCHERS_PIN 4
+#define PINCHERS_PIN 3
 
 class Pinchers : public Module {
     public:

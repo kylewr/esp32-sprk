@@ -1,26 +1,20 @@
 #pragma once
 
+#include <Adafruit_NeoPixel.h>
 #include <Arduino.h>
 #include <cstdint>
 
 #include "Module.hpp"
 
-#define RSL_PIN 21
-#define STATUS_PIN 22
+#define RSL_PIN 13
+#define STATUS_PIN 48
+
+#define STATUS_COLOR_R 32
+#define STATUS_COLOR_G 8
+#define STATUS_COLOR_B 0
 
 enum class LEDState { OFF, ON, BLINKING };
-
-// inline constexpr uint32_t getStateNumber(LEDState state) {
-//     switch (state) {
-//         case LEDState::OFF:
-//             return 0x00;
-//         case LEDState::ON:
-//             return 0x01;
-//         case LEDState::BLINKING:
-//             return 0x02;
-//     }
-//     return 0x00;
-// }
+// enum class LEDColor { RED, GREEN, BLUE };
 
 class LEDStatuses : public Module {
     public:
@@ -30,11 +24,9 @@ class LEDStatuses : public Module {
 
         void init() override {
             pinMode(RSL_PIN, OUTPUT);
-            pinMode(STATUS_PIN, OUTPUT);
-
-            // write all status pins low
             digitalWrite(RSL_PIN, LOW);
-            digitalWrite(STATUS_PIN, LOW);
+
+            onboardLED.begin();
         }
 
         void update() override {
@@ -49,7 +41,8 @@ class LEDStatuses : public Module {
             if (state_STATUS == LEDState::BLINKING) {
                 if (currentTime - lastBlinkTime_STATUS >= (1000 / hz_STATUS)) {
                     blinkingIsOn_STATUS = !blinkingIsOn_STATUS;
-                    digitalWrite(STATUS_PIN, blinkingIsOn_STATUS);
+                    onboardLED.setPixelColor(0, blinkingIsOn_STATUS ? onboardLED.Color(STATUS_COLOR_R, STATUS_COLOR_G, STATUS_COLOR_B) : onboardLED.Color(0, 0, 0));
+                    onboardLED.show();
                     lastBlinkTime_STATUS = currentTime;
                 }
             }
@@ -91,10 +84,12 @@ class LEDStatuses : public Module {
             state_STATUS = newState;
             switch (newState) {
                 case LEDState::OFF:
-                    digitalWrite(STATUS_PIN, LOW);
+                    onboardLED.clear();
+                    onboardLED.show();
                     break;
                 case LEDState::ON:
-                    digitalWrite(STATUS_PIN, HIGH);
+                    onboardLED.setPixelColor(0, onboardLED.Color(STATUS_COLOR_R, STATUS_COLOR_G, STATUS_COLOR_B));
+                    onboardLED.show();
                     break;
                 case LEDState::BLINKING:
                     lastBlinkTime_STATUS = 0;
@@ -112,6 +107,8 @@ class LEDStatuses : public Module {
         }
 
     private:
+        Adafruit_NeoPixel onboardLED = Adafruit_NeoPixel(1, STATUS_PIN, NEO_GRB + NEO_KHZ800);
+
         uint32_t hz_RSL = 5;
         uint32_t hz_STATUS = 2;
 

@@ -16,7 +16,7 @@ SPISlaveWrapper::SPISlaveWrapper() {
 }
 
 bool SPISlaveWrapper::begin() {
-    return spi.begin(SPI_BUS);
+    return spi.begin(SPI_BUS, SPI_SCK_PIN, SPI_MISO_PIN, SPI_MOSI_PIN, SPI_SS_PIN);
 }
 
 void SPISlaveWrapper::listen() {
